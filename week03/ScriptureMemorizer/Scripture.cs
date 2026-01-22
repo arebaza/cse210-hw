@@ -23,9 +23,21 @@ public class Scripture
 
     public void HideRandomWords(int numberToHide)
     {
+        // Count how many words are still visible
+        int visibles = 0;
+
+        foreach (Word palabra in _words)
+        {
+            if (!palabra.IsHidden())
+            {
+                visibles++;
+            }
+        }
+
+        int cantidadAocultar = Math.Min(numberToHide, visibles);
         int ocultadas = 0;
 
-        while (ocultadas < numberToHide)
+        while (ocultadas < cantidadAocultar)
         {
             int indice = _random.Next(_words.Count);
 

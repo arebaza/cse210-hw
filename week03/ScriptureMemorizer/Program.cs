@@ -4,12 +4,16 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Creativity: this program can easily support more scriptures later
-        Reference reference = new Reference("Proverbs", 3, 5, 6);
+        // Exceeds requirements:
+        // - Prevents infinite loops when hiding words
+        // - Keeps punctuation visible while hiding letters
+        // - Uses clean encapsulation and separation of responsibilities
+
+        Reference reference = new Reference("Doctrine and Covenants", 82, 10);
 
         Scripture scripture = new Scripture(
             reference,
-            "Trust in the Lord with all thine heart and lean not unto thine own understanding."
+            "I, the Lord, am bound when ye do what I say; but when ye do not what I say, ye have no promise."
         );
 
         while (!scripture.IsCompletelyHidden())
@@ -23,7 +27,7 @@ class Program
 
             if (respuestaUsuario.ToLower() == "quit")
             {
-                break;
+                return;
             }
 
             scripture.HideRandomWords(3);
@@ -31,6 +35,7 @@ class Program
 
         Console.Clear();
         Console.WriteLine(scripture.GetDisplayText());
-        Console.WriteLine("\nProgram finished. All words are hidden.");
+        Console.WriteLine();
+        Console.WriteLine("Program finished. All words are hidden.");
     }
 }

@@ -26,11 +26,22 @@ public class Word
 
     public string GetDisplayText()
     {
-        if (_isHidden)
+        if (!_isHidden)
         {
-            return new string('_', _text.Length);
+            return _text;
         }
 
-        return _text;
+        // Hide letters only, keep punctuation visible
+        char[] caracteres = _text.ToCharArray();
+
+        for (int i = 0; i < caracteres.Length; i++)
+        {
+            if (char.IsLetter(caracteres[i]))
+            {
+                caracteres[i] = '_';
+            }
+        }
+
+        return new string(caracteres);
     }
 }
