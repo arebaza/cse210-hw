@@ -1,11 +1,11 @@
-public class Producto
+public class Product
 {
     private string _name;
     private string _productId;
     private double _price;
     private int _quantity;
 
-    public Producto(string name, string productId, double price, int quantity)
+    public Product(string name, string productId, double price, int quantity)
     {
         _name = name;
         _productId = productId;
@@ -13,8 +13,15 @@ public class Producto
         _quantity = quantity;
     }
 
-    public string GetName() => _name;
-    public string GetProductId() => _productId;
+    public string GetName()
+    {
+        return _name;
+    }
+
+    public string GetProductId()
+    {
+        return _productId;
+    }
 
     public double GetTotalCost()
     {

@@ -15,8 +15,8 @@ public class Address
 
     public bool IsInUSA()
     {
-        string c = _country.ToUpper();
-        return c == "USA" || c == "UNITED STATES" || c == "UNITED STATES OF AMERICA";
+        string c = _country.Trim().ToUpper();
+        return c == "USA" || c == "US" || c == "UNITED STATES" || c == "UNITED STATES OF AMERICA";
     }
 
     public string GetFullAddress()
