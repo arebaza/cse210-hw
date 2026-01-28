@@ -9,6 +9,13 @@ public class Comment
         _text = text;
     }
 
-    public string GetName() => _name;
-    public string GetText() => _text;
+    public string GetName()
+    {
+        return _name;
+    }
+
+    public string GetText()
+    {
+        return _text;
+    }
 }
