@@ -3,11 +3,17 @@ using System.Threading;
 
 public abstract class Activity
 {
-    protected string _name;
-    protected string _description;
-    protected int _duration;
+    private string _name;
+    private string _description;
+    private int _duration;
 
-    // This method displays the start message and asks the user for the duration
+    protected Activity(string name, string description)
+    {
+        _name = name;
+        _description = description;
+    }
+
+    // This displays the common starting message for all activities.
     public void DisplayStartingMessage()
     {
         Console.Clear();
@@ -15,17 +21,15 @@ public abstract class Activity
         Console.WriteLine();
         Console.WriteLine(_description);
         Console.WriteLine();
-        Console.Write("How long, in seconds, would you like for your session? ");
 
-        // This keeps input simple for the assignment
-        _duration = int.Parse(Console.ReadLine());
+        _duration = PedirDuracion();
 
         Console.WriteLine();
         Console.WriteLine("Get ready...");
         ShowSpinner(3);
     }
 
-    // This method displays the end message shared by all activities
+    // This displays the common ending message for all activities.
     public void DisplayEndingMessage()
     {
         Console.WriteLine();
@@ -36,27 +40,45 @@ public abstract class Activity
         ShowSpinner(3);
     }
 
-    // This method shows a spinner animation for a number of seconds
-    protected void ShowSpinner(int segundos)
+    // This method asks the user for duration and validates input.
+    private int PedirDuracion()
     {
-        for (int i = 0; i < segundos; i++)
+        while (true)
         {
-            Console.Write("|");
-            Thread.Sleep(250);
-            Console.Write("\b/");
-            Thread.Sleep(250);
-            Console.Write("\b-");
-            Thread.Sleep(250);
-            Console.Write("\b\\");
-            Thread.Sleep(250);
-            Console.Write("\b \b");
+            Console.Write("How long, in seconds, would you like for your session? ");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int seconds) && seconds > 0)
+            {
+                return seconds;
+            }
+
+            Console.WriteLine("Please enter a valid positive number.");
         }
     }
 
-    // This method shows a countdown animation
-    protected void ShowCountDown(int segundos)
+    // This shows a spinner animation for a given number of seconds.
+    protected void ShowSpinner(int seconds)
     {
-        for (int i = segundos; i > 0; i--)
+        string[] frames = { "|", "/", "-", "\\" };
+        DateTime endTime = DateTime.Now.AddSeconds(seconds);
+        int i = 0;
+
+        while (DateTime.Now < endTime)
+        {
+            Console.Write(frames[i % frames.Length]);
+            Thread.Sleep(200);
+            Console.Write("\b");
+            i++;
+        }
+
+        Console.Write(" \b");
+    }
+
+    // This shows a countdown animation.
+    protected void ShowCountDown(int seconds)
+    {
+        for (int i = seconds; i > 0; i--)
         {
             Console.Write(i);
             Thread.Sleep(1000);
@@ -64,6 +86,24 @@ public abstract class Activity
         }
     }
 
-    // Each activity must implement its own behavior
+    // This returns the activity name for logging.
+    public string ObtenerNombreActividad()
+    {
+        return _name;
+    }
+
+    // This returns the duration for logging.
+    public int ObtenerDuracion()
+    {
+        return _duration;
+    }
+
+    // This returns the duration so derived classes can use it safely.
+    protected int GetDuration()
+    {
+        return _duration;
+    }
+
+    // Each derived activity must implement Run.
     public abstract void Run();
 }
