@@ -1,19 +1,20 @@
 public class WritingAssignment : Assignment
 {
-    private string _title;
+    // This variable stores the title of the writing assignment
+    private string _titulo;
 
-    // Constructor requires student name, topic, title
-    public WritingAssignment(string studentName, string topic, string title)
+    // Constructor sets writing-specific data and uses the base constructor
+    public WritingAssignment(string studentName, string topic, string titulo)
         : base(studentName, topic)
     {
-        _title = title;
+        _titulo = titulo;
     }
 
-    // Returns "The Causes of World War II by Mary Waters"
+    // This method returns the writing information
     public string GetWritingInformation()
     {
-        // Can't access _studentName directly because it's private in the base class,
-        // so we use the public getter method.
-        return $"{_title} by {GetStudentName()}";
+        // We cannot access the student name directly because it is private,
+        // so we use the getter method from the base class
+        return $"{_titulo} by {ObtenerNombreEstudiante()}";
     }
 }

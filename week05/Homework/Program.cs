@@ -4,31 +4,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Step 3 test: Base class
-        Assignment simple = new Assignment("Samuel Bennett", "Multiplication");
-        Console.WriteLine(simple.GetSummary());
+        // This program demonstrates inheritance using assignments
+        // Base class Assignment and two derived classes
+
+        Assignment tareaSimple = new Assignment("Samuel Bennett", "Multiplication");
+        Console.WriteLine(tareaSimple.GetSummary());
         Console.WriteLine();
 
-        // Step 4 test: MathAssignment
-        MathAssignment math = new MathAssignment(
+        MathAssignment mathHomework = new MathAssignment(
             "Roberto Rodriguez",
             "Fractions",
             "7.3",
             "8-19"
         );
 
-        Console.WriteLine(math.GetSummary());
-        Console.WriteLine(math.GetHomeworkList());
+        Console.WriteLine(mathHomework.GetSummary());
+        Console.WriteLine(mathHomework.GetHomeworkList());
         Console.WriteLine();
 
-        // Step 5 test: WritingAssignment
-        WritingAssignment writing = new WritingAssignment(
+        WritingAssignment writingHomework = new WritingAssignment(
             "Mary Waters",
             "European History",
             "The Causes of World War II"
         );
 
-        Console.WriteLine(writing.GetSummary());
-        Console.WriteLine(writing.GetWritingInformation());
+        Console.WriteLine(writingHomework.GetSummary());
+        Console.WriteLine(writingHomework.GetWritingInformation());
     }
 }
