@@ -4,20 +4,27 @@ using System.IO;
 
 public class GoalManager
 {
-    private const string ArchivoMetas = "goals.txt"; // Spanish constant name, comment in English
+    private const string ArchivoMetas = "goals.txt";
 
     private List<Goal> _goals;
     private int _score;
 
-    private int nivelActual;       // Spanish variable name
-    private string tituloActual;   // Spanish variable name
+    private int _nivelActual;
+    private string _tituloActual;
+
+    private int _ultimoIndiceEternal;
+    private bool _ultimoFueEternal;
 
     public GoalManager()
     {
         _goals = new List<Goal>();
         _score = 0;
-        nivelActual = 1;
-        tituloActual = "Beginner";
+
+        _nivelActual = 1;
+        _tituloActual = "Beginner";
+
+        _ultimoIndiceEternal = -1;
+        _ultimoFueEternal = false;
     }
 
     public void Start()
@@ -36,8 +43,9 @@ public class GoalManager
             Console.WriteLine("  4. Load Goals");
             Console.WriteLine("  5. Record Event");
             Console.WriteLine("  6. Quit");
+            Console.WriteLine("  7. Delete ALL records");
 
-            int opcion = PedirEntero("Select a choice from the menu: ", 1, 6);
+            int opcion = PedirEntero("Select a choice from the menu: ", 1, 7);
 
             switch (opcion)
             {
@@ -59,6 +67,9 @@ public class GoalManager
                 case 6:
                     salir = true;
                     break;
+                case 7:
+                    DeleteAllRecords();
+                    break;
             }
         }
     }
@@ -67,7 +78,7 @@ public class GoalManager
     {
         UpdateLevelSystem();
         Console.WriteLine($"You have {_score} points.");
-        Console.WriteLine($"Level: {nivelActual}  Title: {tituloActual}");
+        Console.WriteLine($"Level: {_nivelActual}  Title: {_tituloActual}");
         Console.WriteLine($"Save file: {ArchivoMetas}");
     }
 
@@ -136,6 +147,8 @@ public class GoalManager
         int index = PedirEntero("Which goal did you accomplish? ", 1, _goals.Count) - 1;
 
         int puntosGanados = _goals[index].RecordEvent();
+        puntosGanados += CalcularBonoRachaEternal(index);
+
         _score += puntosGanados;
 
         if (puntosGanados > 0)
@@ -149,6 +162,70 @@ public class GoalManager
 
         UpdateLevelSystem();
         Console.WriteLine($"You now have {_score} points.");
+    }
+
+    private int CalcularBonoRachaEternal(int index)
+    {
+        if (!(_goals[index] is EternalGoal eternal))
+        {
+            ResetearRachaEternal();
+            return 0;
+        }
+
+        if (_ultimoFueEternal && _ultimoIndiceEternal == index)
+        {
+            eternal.IncrementStreak();
+        }
+        else
+        {
+            ResetearRachaEternal();
+            eternal.IncrementStreak();
+        }
+
+        _ultimoFueEternal = true;
+        _ultimoIndiceEternal = index;
+
+        int bonus = eternal.GetStreakCount() * 5;
+        Console.WriteLine($"Eternal streak bonus: +{bonus} (streak {eternal.GetStreakCount()})");
+        return bonus;
+    }
+
+    private void ResetearRachaEternal()
+    {
+        foreach (Goal goal in _goals)
+        {
+            if (goal is EternalGoal eg)
+            {
+                eg.ResetStreak();
+            }
+        }
+
+        _ultimoIndiceEternal = -1;
+        _ultimoFueEternal = false;
+    }
+
+    private void DeleteAllRecords()
+    {
+        Console.Write("Are you sure you want to delete ALL goals and reset the score? (y/n): ");
+        string answer = Console.ReadLine();
+
+        if (answer == null || !answer.Trim().ToLower().StartsWith("y"))
+        {
+            Console.WriteLine("Operation canceled.");
+            return;
+        }
+
+        _goals.Clear();
+        _score = 0;
+
+        _nivelActual = 1;
+        _tituloActual = "Beginner";
+
+        ResetearRachaEternal();
+
+        SaveGoals();
+
+        Console.WriteLine("All records have been deleted and the score has been reset.");
     }
 
     public void SaveGoals()
@@ -170,7 +247,8 @@ public class GoalManager
     {
         if (!File.Exists(ArchivoMetas))
         {
-            Console.WriteLine($"File not found: {ArchivoMetas}");
+            Console.WriteLine($"File not found: {ArchivoMetas}. Creating a new one...");
+            SaveGoals();
             return;
         }
 
@@ -183,6 +261,7 @@ public class GoalManager
         }
 
         _goals.Clear();
+        ResetearRachaEternal();
 
         if (!int.TryParse(lines[0], out _score))
         {
@@ -193,16 +272,17 @@ public class GoalManager
         for (int i = 1; i < lines.Length; i++)
         {
             string line = lines[i];
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
             string[] parts = line.Split('|');
-
-            if (parts.Length == 0) continue;
-
             string type = parts[0];
 
             try
             {
                 if (type == "SimpleGoal")
                 {
+                    if (parts.Length < 5) { Console.WriteLine($"Skipped bad line: {line}"); continue; }
+
                     string name = parts[1];
                     string desc = parts[2];
                     int points = int.Parse(parts[3]);
@@ -212,14 +292,19 @@ public class GoalManager
                 }
                 else if (type == "EternalGoal")
                 {
+                    if (parts.Length < 5) { Console.WriteLine($"Skipped bad line: {line}"); continue; }
+
                     string name = parts[1];
                     string desc = parts[2];
                     int points = int.Parse(parts[3]);
+                    int streakCount = int.Parse(parts[4]);
 
-                    _goals.Add(new EternalGoal(name, desc, points));
+                    _goals.Add(new EternalGoal(name, desc, points, streakCount));
                 }
                 else if (type == "ChecklistGoal")
                 {
+                    if (parts.Length < 7) { Console.WriteLine($"Skipped bad line: {line}"); continue; }
+
                     string name = parts[1];
                     string desc = parts[2];
                     int points = int.Parse(parts[3]);
@@ -229,10 +314,14 @@ public class GoalManager
 
                     _goals.Add(new ChecklistGoal(name, desc, points, target, bonus, amountCompleted));
                 }
+                else
+                {
+                    Console.WriteLine($"Skipped unknown type: {line}");
+                }
             }
             catch
             {
-                Console.WriteLine($"Skipped an invalid line in the file: {line}");
+                Console.WriteLine($"Skipped invalid line: {line}");
             }
         }
 
@@ -244,11 +333,11 @@ public class GoalManager
     {
         int newLevel = (_score / 1000) + 1;
 
-        if (newLevel != nivelActual)
+        if (newLevel != _nivelActual)
         {
-            nivelActual = newLevel;
-            tituloActual = GetTitleForLevel(nivelActual);
-            Console.WriteLine($"Level up! You are now Level {nivelActual} ({tituloActual}).");
+            _nivelActual = newLevel;
+            _tituloActual = GetTitleForLevel(_nivelActual);
+            Console.WriteLine($"Level up! You are now Level {_nivelActual} ({_tituloActual}).");
         }
     }
 
